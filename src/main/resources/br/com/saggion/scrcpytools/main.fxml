@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.saggion.scrcpytools.controller.Main">
+    <padding>
+        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+    <HBox prefWidth="200.0" spacing="5.0">
+        <VBox.margin>
+            <Insets />
+        </VBox.margin>
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </padding>
+        <Label text="Devices" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Label layoutX="15.0" layoutY="15.0" prefWidth="165.0" text="Actions" />
+    </HBox>
+    <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0" VBox.vgrow="ALWAYS">
+        <TableView fx:id="tableViewDevices" prefWidth="400.0" HBox.hgrow="SOMETIMES">
+            <columns>
+                <TableColumn fx:id="tableColumnMaker" editable="false" prefWidth="-1.0" sortable="false" text="Maker" />
+                <TableColumn fx:id="tableColumnHardware" editable="false" prefWidth="-1.0" sortable="false" text="Hardware" />
+                <TableColumn fx:id="tableColumnSerial" editable="false" prefWidth="-1.0" sortable="false" text="Serial" />
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
+        </TableView>
+        <VBox prefHeight="200.0" prefWidth="175.0" spacing="5.0">
+            <Button fx:id="buttonMirrorScreen" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonMirrorScreenOnAction" text="Mirror Screen" />
+            <Button fx:id="buttonRecordScreen" layoutX="10.0" layoutY="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonRecordScreenOnAction" text="Record Screen" />
+            <Button fx:id="buttonReloadDevices" layoutX="10.0" layoutY="40.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonReloadDevicesOnAction" text="Reload Devices" />
+         <Button fx:id="buttonTaskManager" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonTaskManagerOnAction" text="Task Manager" />
+         <CheckBox fx:id="checkboxAlwaysOnTop" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#checkboxAlwaysOnTopOnAction" text="Always On Top" />
+         <CheckBox fx:id="checkboxFullscreen" layoutX="10.0" layoutY="100.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#checkboxFullscreenOnAction" text="Fullscreen" />
+        </VBox>
+    </HBox>
+</VBox>

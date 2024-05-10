@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.com.saggion.scrcpytools.controller.TaskManager">
+    <padding>
+        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+    <HBox prefWidth="200.0">
+        <Label text="Activities" />
+        <Pane prefWidth="200.0" HBox.hgrow="ALWAYS" />
+        <Label layoutX="10.0" layoutY="10.0" prefWidth="165.0" text="Actions" />
+    </HBox>
+    <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0" VBox.vgrow="ALWAYS">
+        <VBox spacing="5.0" HBox.hgrow="SOMETIMES">
+            <ListView fx:id="listViewActivities"/>
+            <Label text="Packages"/>
+            <ListView fx:id="listViewPackages" VBox.vgrow="SOMETIMES"/>
+        </VBox>
+        <VBox prefWidth="165.0" spacing="5.0">
+            <Button fx:id="buttonRestart" layoutX="10.0" layoutY="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonRestartOnAction" text="Restart" />
+            <Button fx:id="buttonForceStop" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonForceStopOnAction" text="Force Stop" />
+            <Button fx:id="buttonClearData" layoutX="10.0" layoutY="10.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonClearDataOnAction" text="Clear Data" />
+            <Button fx:id="buttonUninstall" layoutX="10.0" layoutY="40.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonUninstallOnAction" text="Uninstall" />
+            <Button fx:id="buttonReload" layoutX="10.0" layoutY="100.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#buttonReloadOnAction" text="Reload" />
+        </VBox>
+    </HBox>
+</VBox>
