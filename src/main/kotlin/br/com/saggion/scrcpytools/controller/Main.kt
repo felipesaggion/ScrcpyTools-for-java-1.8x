@@ -125,7 +125,7 @@ class Main : Initializable {
             val command = StringBuilder()
             command
                 .append(scrcpy)
-                .append(" -serial=${device.serial}")
+                .append(" --serial=${device.serial}")
                 .append(" --power-off-on-close")
                 .append(" --stay-awake")
                 .append(" --window-title=\"$fileName\"")
