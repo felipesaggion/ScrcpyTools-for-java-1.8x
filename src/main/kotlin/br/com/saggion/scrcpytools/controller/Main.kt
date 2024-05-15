@@ -6,7 +6,6 @@ import br.com.saggion.scrcpytools.util.ADB
 import br.com.saggion.scrcpytools.util.Alert
 import br.com.saggion.scrcpytools.util.Constants
 import br.com.saggion.scrcpytools.util.DataHolder
-import br.com.saggion.scrcpytools.util.TextInputDialog
 import javafx.beans.property.SimpleStringProperty
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
@@ -18,6 +17,7 @@ import javafx.scene.control.CheckBox
 import javafx.scene.control.TableColumn
 import javafx.scene.control.TableView
 import javafx.scene.image.Image
+import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.io.File
 import java.net.URL
@@ -114,13 +114,25 @@ class Main : Initializable {
         lockControls(true)
         val device = tableViewDevices.selectionModel.selectedItem
         val fileName = "${device.maker}(${device.hardware}) ${device.serial}"
-        val textInputDialog = TextInputDialog(fileName)
-        textInputDialog.headerText = "Input the file name"
-        textInputDialog.showAndWait()
-        if (textInputDialog.result.isNullOrBlank()) {
+        val fileChooser = FileChooser().apply {
+            title = "Select the file name"
+            initialDirectory = File(File("").absolutePath)
+            initialFileName = "$fileName.mp4"
+            extensionFilters.add(FileChooser.ExtensionFilter("MP4 files", "*.mp4"))
+        }
+        val file = fileChooser.showSaveDialog(buttonRecordScreen.scene.window)
+
+        if (file == null) {
             lockControls(false)
             return
         }
+
+        val pathToSave = if (file.absolutePath.lowercase().endsWith(".mp4")) {
+            file.absolutePath
+        } else {
+            file.absolutePath + ".mp4"
+        }
+
         thread {
             val command = StringBuilder()
             command
@@ -130,7 +142,7 @@ class Main : Initializable {
                 .append(" --stay-awake")
                 .append(" --window-title=\"$fileName\"")
                 .append(" --record-format=mp4")
-                .append(" --record=\"${textInputDialog.result}.mp4\"")
+                .append(" --record=\"${pathToSave}\"")
             if (settings.alwaysOnTop) {
                 command.append(" --always-on-top")
             }
