@@ -1,7 +1,6 @@
 package br.com.saggion.scrcpytools.util
 
 import br.com.saggion.scrcpytools.domain.Device
-import com.sun.deploy.util.StringUtils
 import javafx.scene.control.TextArea
 import java.io.File
 
@@ -204,6 +203,6 @@ object ADB {
     }
 
     private fun logCommand(command: List<String>) {
-        textArea?.appendText(StringUtils.join(command, " ").replace(adb, "adb").plus("\n"))
+        textArea?.appendText(command.joinToString(" ").replace(adb, "adb").plus("\n"))
     }
 }
