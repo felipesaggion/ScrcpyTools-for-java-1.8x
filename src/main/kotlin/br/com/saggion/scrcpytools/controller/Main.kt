@@ -6,6 +6,7 @@ import br.com.saggion.scrcpytools.util.ADB
 import br.com.saggion.scrcpytools.util.Alert
 import br.com.saggion.scrcpytools.util.Constants
 import br.com.saggion.scrcpytools.util.DataHolder
+import br.com.saggion.scrcpytools.util.SCRCPY
 import javafx.beans.property.SimpleStringProperty
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
@@ -16,7 +17,10 @@ import javafx.scene.control.Button
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TableColumn
 import javafx.scene.control.TableView
+import javafx.scene.control.TextArea
 import javafx.scene.image.Image
+import javafx.scene.text.Font
+import javafx.scene.text.FontWeight
 import javafx.stage.FileChooser
 import javafx.stage.Stage
 import java.io.File
@@ -44,6 +48,9 @@ class Main : Initializable {
     private lateinit var buttonRecordScreen: Button
 
     @FXML
+    private lateinit var buttonShellConsole: Button
+
+    @FXML
     private lateinit var buttonTaskManager: Button
 
     @FXML
@@ -55,16 +62,23 @@ class Main : Initializable {
     @FXML
     private lateinit var checkboxFullscreen: CheckBox
 
-    private var settings = Settings()
-    private val runtime = Runtime.getRuntime()
-    private val scrcpy = File("${Constants.TEMP_DIRECTORY}scrcpy-tools/scrcpy-win64-v2.4/scrcpy.exe").absolutePath
+    @FXML
+    private lateinit var textAreaCommands: TextArea
 
-    override fun initialize(location: URL?, resources: ResourceBundle?) {
+    private var settings = Settings()
+
+    override fun initialize(
+        location: URL?,
+        resources: ResourceBundle?,
+    ) {
         tableColumnHardware.setCellValueFactory { SimpleStringProperty(it.value.hardware) }
         tableColumnMaker.setCellValueFactory { SimpleStringProperty(it.value.maker) }
         tableColumnSerial.setCellValueFactory { SimpleStringProperty(it.value.serial) }
         checkboxAlwaysOnTop.isSelected = settings.alwaysOnTop
         checkboxFullscreen.isSelected = settings.fullScreen
+        textAreaCommands.font = Font.font("Monospaced", FontWeight.BOLD, 12.0)
+        ADB.textArea = textAreaCommands
+        SCRCPY.textArea = textAreaCommands
         loadDevices()
     }
 
@@ -81,26 +95,8 @@ class Main : Initializable {
         }
         lockControls(true)
         val device = tableViewDevices.selectionModel.selectedItem
-        val title = "${device.maker}(${device.hardware}) ${device.serial}"
         thread {
-            val command = StringBuilder()
-            command
-                .append(scrcpy)
-                .append(" --serial=${device.serial}")
-                .append(" --power-off-on-close")
-                .append(" --stay-awake")
-                .append(" --window-title=\"$title\"")
-            if (settings.alwaysOnTop) {
-                command.append(" --always-on-top")
-            }
-            if (settings.fullScreen) {
-                command.append(" --fullscreen")
-            }
-            val process = runtime.exec(command.toString())
-            process.errorStream.bufferedReader().use { bufferedReader ->
-                bufferedReader.readLines().forEach { println(it) }
-            }
-            process.waitFor()
+            SCRCPY.mirrorScreen(device, settings)
             lockControls(false)
         }
     }
@@ -114,12 +110,13 @@ class Main : Initializable {
         lockControls(true)
         val device = tableViewDevices.selectionModel.selectedItem
         val fileName = "${device.maker}(${device.hardware}) ${device.serial}"
-        val fileChooser = FileChooser().apply {
-            title = "Select the file name"
-            initialDirectory = File(File("").absolutePath)
-            initialFileName = "$fileName.mp4"
-            extensionFilters.add(FileChooser.ExtensionFilter("MP4 files", "*.mp4"))
-        }
+        val fileChooser =
+            FileChooser().apply {
+                title = "Select the file name"
+                initialDirectory = File(File("").absolutePath)
+                initialFileName = "$fileName.mp4"
+                extensionFilters.add(FileChooser.ExtensionFilter("MP4 files", "*.mp4"))
+            }
         val file = fileChooser.showSaveDialog(buttonRecordScreen.scene.window)
 
         if (file == null) {
@@ -127,33 +124,15 @@ class Main : Initializable {
             return
         }
 
-        val pathToSave = if (file.absolutePath.lowercase().endsWith(".mp4")) {
-            file.absolutePath
-        } else {
-            file.absolutePath + ".mp4"
-        }
+        val pathToSave =
+            if (file.absolutePath.lowercase().endsWith(".mp4")) {
+                file.absolutePath
+            } else {
+                file.absolutePath + ".mp4"
+            }
 
         thread {
-            val command = StringBuilder()
-            command
-                .append(scrcpy)
-                .append(" --serial=${device.serial}")
-                .append(" --power-off-on-close")
-                .append(" --stay-awake")
-                .append(" --window-title=\"$fileName\"")
-                .append(" --record-format=mp4")
-                .append(" --record=\"${pathToSave}\"")
-            if (settings.alwaysOnTop) {
-                command.append(" --always-on-top")
-            }
-            if (settings.fullScreen) {
-                command.append(" --fullscreen")
-            }
-            val process = runtime.exec(command.toString())
-            process.errorStream.bufferedReader().use { bufferedReader ->
-                bufferedReader.readLines().forEach { println(it) }
-            }
-            process.waitFor()
+            SCRCPY.recordScreen(device, settings, pathToSave)
             lockControls(false)
         }
     }
@@ -164,23 +143,19 @@ class Main : Initializable {
     }
 
     @FXML
-    fun checkboxAlwaysOnTopOnAction() {
-        settings = settings.copy(
-            alwaysOnTop = !settings.alwaysOnTop,
-        )
-    }
-
-    @FXML
-    fun checkboxFullscreenOnAction() {
-        settings = settings.copy(
-            fullScreen = !settings.fullScreen,
-        )
+    fun buttonShellConsoleOnAction() {
+        if (!isDeviceSelected()) {
+            Alert(AlertType.WARNING, "Select a device to start the shell console").show()
+            return
+        }
+        val device = tableViewDevices.selectionModel.selectedItem
+        ADB.startShellConsole(device)
     }
 
     @FXML
     fun buttonTaskManagerOnAction() {
         if (!isDeviceSelected()) {
-            Alert(AlertType.WARNING, "Select a device to record the screen").show()
+            Alert(AlertType.WARNING, "Select a device to start the task manager").show()
             return
         }
         val device = tableViewDevices.selectionModel.selectedItem
@@ -193,11 +168,28 @@ class Main : Initializable {
         stage.show()
     }
 
+    @FXML
+    fun checkboxAlwaysOnTopOnAction() {
+        settings =
+            settings.copy(
+                alwaysOnTop = !settings.alwaysOnTop,
+            )
+    }
+
+    @FXML
+    fun checkboxFullscreenOnAction() {
+        settings =
+            settings.copy(
+                fullScreen = !settings.fullScreen,
+            )
+    }
+
     private fun lockControls(lock: Boolean) {
         buttonMirrorScreen.isDisable = lock
         buttonRecordScreen.isDisable = lock
         buttonReloadDevices.isDisable = lock
         buttonTaskManager.isDisable = lock
+        buttonShellConsole.isDisable = lock
         tableViewDevices.isDisable = lock
         checkboxAlwaysOnTop.isDisable = lock
         checkboxFullscreen.isDisable = lock
