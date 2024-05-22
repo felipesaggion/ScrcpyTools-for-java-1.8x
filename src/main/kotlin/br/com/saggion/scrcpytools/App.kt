@@ -10,6 +10,7 @@ import javafx.stage.Stage
 import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.system.exitProcess
 
 class App : Application() {
     override fun start(stage: Stage) {
@@ -18,6 +19,7 @@ class App : Application() {
         stage.icons.add(Image(javaClass.getResourceAsStream("icon.png")))
         stage.title = Constants.APP_TITLE
         stage.scene = Scene(fxmlLoader.load())
+        stage.setOnCloseRequest { exitProcess(0) }
         stage.show()
     }
 
